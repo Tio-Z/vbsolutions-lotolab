@@ -1,1 +1,0 @@
-Reels prontos (versão curta).

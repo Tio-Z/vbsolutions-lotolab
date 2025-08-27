@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LotoLab PRO — Gerador com dados externos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#07090f;--card:#0d1118;--muted:#9aa3b3;--text:#f7fafc;--primary:#3A86FF;--success:#22C55E;--accent:#F6C90E;--purple:#7C3AED}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+  .wrap{max-width:1160px;margin:0 auto;padding:24px}
+  h1{font-family:'Poppins',sans-serif;font-size:40px;background:linear-gradient(90deg,#7C3AED,#3A86FF,#22C55E);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0 0 6px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:var(--card);border:1px solid #1b2232;border-radius:16px;padding:18px}
+  label{display:block;margin:8px 0 6px;font-weight:600}
+  select,input[type=number],input[type=range]{width:100%;padding:10px;border-radius:10px;border:1px solid #263149;background:#0f1116;color:#fff}
+  .row{display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:12px}
+  button{padding:14px 18px;border-radius:12px;border:2px solid var(--primary);background:#0b1324;color:#fff;font-weight:700;cursor:pointer}
+  button:hover{background:#0f1b36}
+  .out{white-space:pre-wrap;background:#0f1116;border-radius:12px;padding:12px;border:1px solid #222;margin-top:10px;color:#e9eef9;min-height:120px}
+  .muted{color:var(--muted)}
+  .tabs{display:flex;gap:10px;margin:10px 0}
+  .tab{padding:10px 14px;border:1px solid #263149;border-radius:999px;cursor:pointer}
+  .tab.active{background:#0f1524;border-color:#3A86FF}
+
+  @media (max-width: 960px){
+    h1{font-size:clamp(22px,6vw,32px)}
+    .grid{grid-template-columns:1fr}
+    button{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>LotoLab PRO</h1>
+  <p>Dados externos atualizáveis + controles de geração. <span class="muted">(Atualize os arquivos em <code>/data/mega.json</code> e <code>/data/loto.json</code> diariamente até 12h BRT.)</span></p>
+
+  <div class="tabs">
+    <div class="tab active" id="tabMega" onclick="setTab('mega')">Mega‑Sena</div>
+    <div class="tab" id="tabLoto" onclick="setTab('loto')">Lotofácil</div>
+    <div class="tab" onclick="location.href='index.html'">← Voltar</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="lotName">Mega‑Sena</h2>
+      <p class="muted">Última atualização: <span id="lastUpdate">—</span> • Concursos carregados: <span id="countRows">—</span></p>
+
+      <div class="row">
+        <div>
+          <label>Usar últimos <span id="nLabel">30</span> concursos</label>
+          <input id="nDraws" type="range" min="10" max="200" step="1" value="30" oninput="document.getElementById('nLabel').textContent=this.value; document.getElementById('allDraws').checked=false;">
+          <label style="margin-top:8px"><input type="checkbox" id="allDraws" onchange="toggleAll()"> Usar <b>todos</b> os concursos</label>
+        </div>
+        <div>
+          <label>Metodologia</label>
+          <select id="method">
+            <option value="balanced">Equilíbrio (paridade + soma + entropia)</option>
+            <option value="antiHot">Anti-Quente (penaliza mais os “hot”)</option>
+            <option value="minSeq">Mínima sequência (prioriza quebra de sequências)</option>
+            <option value="random">Random (baseline)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Nº de combinações</label>
+          <input id="kComb" type="number" min="1" max="20" value="3">
+        </div>
+        <div>
+          <label>Dezenas por aposta</label>
+          <input id="mSize" type="number" min="6" max="15" value="6">
+        </div>
+      </div>
+
+      <p><button onclick="generate()">Gerar combinações</button></p>
+    </div>
+
+    <div class="card">
+      <h2>Saída</h2>
+      <div id="out" class="out"></div>
+      <p class="muted">Aviso: entretenimento. 18+. Loterias são aleatórias e não há garantia de ganho.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let tab = 'mega';
+let dataMega = null, dataLoto = null;
+function setTab(t){ tab=t; document.getElementById('tabMega').classList.toggle('active',t==='mega'); document.getElementById('tabLoto').classList.toggle('active',t!=='mega'); loadData(); }
+
+async function loadData(){
+  const url = turl();
+  const res = await fetch(url);
+  const js = await res.json();
+  if (tab==='mega') dataMega = js; else dataLoto = js;
+  document.getElementById('lotName').textContent = (tab==='mega'?'Mega‑Sena':'Lotofácil');
+  document.getElementById('lastUpdate').textContent = js.last_update_brt;
+  document.getElementById('countRows').textContent = js.rows.length;
+  const slider = document.getElementById('nDraws');
+  slider.max = Math.max(10, js.rows.length);
+  slider.value = Math.min(parseInt(slider.value), js.rows.length);
+  document.getElementById('nLabel').textContent = slider.value;
+  document.getElementById('mSize').min = (tab==='mega'?6:15);
+  document.getElementById('mSize').max = (tab==='mega'?15:20);
+  document.getElementById('mSize').value = (tab==='mega'?6:15);
+  document.getElementById('out').textContent = 'Dados carregados. Pronto para gerar.';
+}
+function turl(){ return tab==='mega' ? './data/mega.json' : './data/loto.json'; }
+
+function toggleAll(){ const cb=document.getElementById('allDraws'); if(cb.checked){ document.getElementById('nLabel').textContent='TODOS'; } else { document.getElementById('nLabel').textContent=document.getElementById('nDraws').value; } }
+
+function parseDraws(js){
+  return js.rows.map(r => tab==='mega' ? r.slice(2,8).map(Number) : r.slice(2,17).map(Number));
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function range(n){ return Array.from({length:n}, (_,i)=>i+1); }
+function entropy(prob){ let s=0; for (const p of prob) if (p>0) s -= p*Math.log(p); return s; }
+function longestRun(arr){ let maxR=1,cur=1; for(let i=1;i<arr.length;i++){ if(arr[i]===arr[i-1]+1) cur++; else cur=1; if(cur>maxR) maxR=cur; } return maxR; }
+function overlap(a,b){ const set=new Set(a); return b.filter(x=>set.has(x)).length; }
+
+function scoreCombo(combo,freq,recent,method){ 
+  const m = combo.length;
+  const evens = combo.filter(n=>n%2===0).length;
+  const parityTarget = Math.round(m/2);
+  const parityScore = Math.max(0, 10 - 3*Math.abs(evens-parityTarget));
+  const sum = combo.reduce((a,b)=>a+b,0);
+  const sumTarget = tab==='mega'?150:195;
+  const sumDiv = tab==='mega'?2:2.5;
+  const sumScore = Math.max(0, 10 - Math.abs(sum-sumTarget)/sumDiv);
+  const consec = longestRun(combo);
+  const consecPenalty = Math.max(0, (consec - (tab==='mega'?2:3))) * (tab==='mega'?4:3);
+  const bins = tab==='mega'?6:5;
+  const arr = Array(bins).fill(0);
+  combo.forEach(n => { const base = tab==='mega'?10:5; arr[Math.floor((n-1)/base)]++; });
+  const ent = entropy(arr.filter(x=>x>0).map(x=> x/m ));
+  const entScore = 10 * (ent / Math.log(bins));
+  const hot = combo.reduce((a,n)=>a+freq[n],0);
+  let hotPenalty = hot * (tab==='mega'?0.4:0.25);
+
+  // Methodology tweaks
+  if (method==='balanced') { /* default */ }
+  else if (method==='antiHot') { hotPenalty *= 1.6; }
+  else if (method==='minSeq') { hotPenalty *= 0.7; }
+  else if (method==='random') { return Math.random()*5; }
+  return 4*entScore + 3*parityScore + 3*sumScore - consecPenalty - hotPenalty;
+}
+
+function generate(){
+  const js = (tab==='mega'?dataMega:dataLoto);
+  if (!js) return;
+  const draws = parseDraws(js);
+  const nDraws = document.getElementById('allDraws').checked ? draws.length : Math.min(parseInt(document.getElementById('nDraws').value), draws.length);
+  const recent = draws.slice(-nDraws);
+  const maxNum = tab==='mega'?60:25;
+  const mSize = Math.max(parseInt(document.getElementById('mSize').value), tab==='mega'?6:15);
+  const mCap = tab==='mega'?15:20;
+  if (mSize>mCap) { alert('Tamanho máximo excedido'); return; }
+  const k = Math.min(parseInt(document.getElementById('kComb').value), 20);
+  const method = document.getElementById('method').value;
+
+  const freq = Array(maxNum+1).fill(0);
+  recent.forEach(d => d.forEach(n => freq[n]++));
+
+  const pool = [];
+  const samples = tab==='mega'?1500:1200;
+  for (let i=0;i<samples;i++){ 
+    const combo = shuffle(range(maxNum)).slice(0,mSize).sort((a,b)=>a-b);
+    const s = scoreCombo(combo,freq,recent,method);
+    pool.push({combo,score:s});
+  }
+  pool.sort((a,b)=>b.score - a.score);
+
+  const picks=[];
+  for (const c of pool){ 
+    const maxOv = tab==='mega'?Math.max(2, Math.floor(mSize*0.35)) : Math.max(9, Math.floor(mSize*0.6));
+    const ok = picks.every(p => overlap(p.combo,c.combo) <= maxOv);
+    if (ok) picks.push(c);
+    if (picks.length===k) break;
+  }
+  const labelMap = {balanced:'Equilíbrio', antiHot:'Anti-Quente', minSeq:'Min Seq', random:'Random'};
+  const lines = picks.map((p,i)=>`#${i+1}  ${p.combo.join('-')}   score:${p.score.toFixed(3)}  (N=${nDraws} • ${labelMap[method]})`);
+  document.getElementById('out').textContent = lines.join('\n');
+}
+
+setTab('mega'); loadData();
+</script>
+</body>
+</html>

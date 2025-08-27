@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-br">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LotoLab — Data Builder (CSV → JSON)</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0b0c10;color:#f5f5f5;margin:0}
+  .wrap{max-width:980px;margin:0 auto;padding:24px}
+  textarea{width:100%;min-height:200px;background:#0f1116;color:#f5f5f5;border:1px solid #222;border-radius:10px;padding:12px}
+  button{padding:12px 16px;border-radius:10px;border:1px solid #3a86ff;background:#111522;color:#fff;cursor:pointer}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .out{white-space:pre-wrap;background:#0f1116;border:1px solid #222;border-radius:10px;padding:12px}
+  .small{opacity:.8}
+</style></head>
+<body><div class="wrap">
+<h1>Data Builder (CSV → JSON)</h1>
+<p>Cole o CSV (com cabeçalho) e gere o <code>mega.json</code> ou <code>loto.json</code> para subir na pasta <code>/data</code> do seu site.</p>
+<div class="row">
+  <div>
+    <h2>Mega‑Sena</h2>
+    <p class="small">Cabeçalho: concurso,data,d1,d2,d3,d4,d5,d6</p>
+    <textarea id="megaTa">concurso,data,d1,d2,d3,d4,d5,d6</textarea>
+    <p><button onclick="gen('mega')">Gerar mega.json</button></p>
+  </div>
+  <div>
+    <h2>Lotofácil</h2>
+    <p class="small">Cabeçalho: concurso,data,n1…n15</p>
+    <textarea id="lotoTa">concurso,data,n1,n2,n3,n4,n5,n6,n7,n8,n9,n10,n11,n12,n13,n14,n15</textarea>
+    <p><button onclick="gen('loto')">Gerar loto.json</button></p>
+  </div>
+</div>
+<h2>Saída</h2>
+<pre id="out" class="out"></pre>
+<script>
+function parseCsv(txt){
+  const rows = txt.trim().split(/\r?\n/).map(r => r.split(',').map(c => c.trim()));
+  const head = rows.shift();
+  return {head, rows};
+}
+function dl(name, content){
+  const blob = new Blob([content], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+}
+function gen(which){
+  const now = new Date();
+  const payload = {lottery:'', last_update_brt: now.toISOString().slice(0,19).replace('T',' '), headers:[], rows:[]};
+  if (which==='mega'){
+    const {head, rows} = parseCsv(document.getElementById('megaTa').value);
+    payload.lottery='MEGA_SENA'; payload.headers=head; payload.rows=rows.map(r=>r.map(x=> isNaN(x)?x:Number(x) ));
+    const txt = JSON.stringify(payload, null, 2);
+    document.getElementById('out').textContent = txt; dl('mega.json', txt);
+  } else {
+    const {head, rows} = parseCsv(document.getElementById('lotoTa').value);
+    payload.lottery='LOTOFACIL'; payload.headers=head; payload.rows=rows.map(r=>r.map(x=> isNaN(x)?x:Number(x) ));
+    const txt = JSON.stringify(payload, null, 2);
+    document.getElementById('out').textContent = txt; dl('loto.json', txt);
+  }
+}
+</script>
+</div></body></html>

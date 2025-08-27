@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LotoLab by VB Solutions — Gere 3 combinações com score em 30s</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#07090f;--card:#0d1118;--muted:#99a3b3;--text:#f7fafc;--primary:#3A86FF;--success:#22C55E;--accent:#F6C90E;--danger:#FF6B6B;--purple:#7C3AED;--gradient:linear-gradient(90deg, #7C3AED, #3A86FF, #22C55E, #F6C90E);}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    a{color:var(--text);text-decoration:none} .wrap{max-width:1180px;margin:0 auto;padding:24px} header{padding:52px 0 24px;text-align:center;position:relative}
+    .prehead{display:inline-block;background:#0f1520;border:1px solid #1b2232;border-radius:999px;padding:8px 14px;font-size:13px;color:var(--muted);margin-bottom:16px}
+    h1{font-family:'Poppins',sans-serif;font-size:56px;line-height:1.05;margin:0;background:var(--gradient);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+    .sub{font-size:20px;color:#dbe2ee;margin:14px auto 24px;max-width:860px}
+    .cta{display:inline-block;padding:16px 22px;border-radius:14px;border:2px solid var(--primary);background:#0b1324;animation:pulse 2s infinite;transition:.2s; font-weight:700}
+    .cta:hover{transform:translateY(-2px);background:#0e1630}
+    .cta2{display:inline-block;padding:16px 22px;border-radius:14px;border:2px solid var(--success);background:#0b1a0f;margin-left:12px;font-weight:700}
+    .cta3{display:inline-block;padding:16px 22px;border-radius:14px;border:2px solid var(--accent);
+background:linear-gradient(90deg,#FFD24A,#F6C90E);color:#111;font-weight:900;letter-spacing:.2px}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(58,134,255,.35)}70%{box-shadow:0 0 0 16px rgba(58,134,255,0)}100%{box-shadow:0 0 0 0 rgba(58,134,255,0)}}
+    .hero-vid{background:#0b0f18;border:1px dashed #263149;border-radius:16px;padding:16px;margin:20px auto 0;max-width:860px}
+    .trust{margin-top:18px;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:22px}
+    .card{background:var(--card);border:1px solid #1b2232;border-radius:18px;padding:22px}
+    .kicker{display:inline-block;background:#0f1320;border:1px solid #20283a;border-radius:10px;padding:6px 10px;font-size:12px;color:var(--muted);margin-bottom:10px}
+    h2{font-family:'Poppins',sans-serif;font-size:28px;letter-spacing:.2px;margin:0 0 12px}
+    ul{padding-left:18px;margin:12px 0;line-height:1.9}
+    .badge{display:inline-block;border:1px solid #2a2e38;border-radius:10px;padding:6px 10px;font-size:12px;margin:6px 6px 0 0;opacity:.9}
+    .pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:10px}
+    .price-card{background:#0b0f18;border:2px solid #28324a;border-radius:18px;padding:22px;position:relative}
+    .price-card.best{border-color:var(--accent);box-shadow:0 0 0 2px rgba(246,201,14,.15)}
+    .pill{position:absolute;top:-12px;right:16px;background:var(--accent);color:#111;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+    .price{font-size:42px;font-weight:800;font-family:'Poppins'}
+    .countdown{display:flex;justify-content:center;gap:10px;margin:14px 0 0}
+    .countdown .box{background:#0a0f18;border:1px solid #263149;border-radius:12px;padding:10px 12px;min-width:74px}
+    .countdown .num{font-weight:800;font-family:'Poppins';font-size:24px;display:block;text-align:center}
+    .countdown .lab{font-size:11px;color:var(--muted);text-align:center;display:block}
+    .compare{overflow:auto} table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border:1px solid #20283a;padding:12px;text-align:left} th{background:#0e1320}
+    .stars{color:var(--accent)} details{background:#0b0f18;border:1px solid #28324a;border-radius:12px;padding:12px;margin:8px 0} summary{cursor:pointer;font-weight:700}
+    footer{opacity:.85;margin:56px 0 0;font-size:14px;text-align:center}
+    .sticky-cta{position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:center;z-index:50}
+    .sticky-cta a{background:linear-gradient(90deg,#3A86FF,#22C55E);padding:14px 28px;border-radius:999px;color:#111;font-weight:800;border:none}
+  
+    /* Mobile first adjustments */
+    @media (max-width: 960px){
+      h1{font-size:clamp(28px,7vw,40px);}
+      .sub{font-size:16px}
+      .grid{grid-template-columns:1fr}
+      .cta,.cta2,.cta3{display:inline-block;padding:16px 22px;border-radius:14px;border:2px solid var(--accent);
+background:linear-gradient(90deg,#FFD24A,#F6C90E);color:#111;font-weight:900;letter-spacing:.2px}
+      header{padding:28px 0 16px}
+      .price{font-size:34px}
+      .sticky-cta a{padding:14px 16px;}
+      body{padding-bottom:86px;} /* keep space for sticky bar */
+    }
+    /* ensure sticky cta doesn't block taps */
+    .sticky-cta{pointer-events:none}
+    .sticky-cta a{pointer-events:auto}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="prehead">Entretenimento responsável • 18+ • Transparência total</div>
+      <h1><strong>Pare de jogar no escuro.</strong> Gere <u>3 combinações</u> com <u>score explicável</u> em <strong>30 segundos</strong>.</h1>
+      <p class="sub"><strong>LotoLab by VB Solutions</strong> — método, não milagre: <b>paridade</b>, <b>soma</b>, <b>entropia</b> e <b>penalidade de sequência</b>. Você organiza o hobby e evolui sua disciplina.</p>
+      <p>
+        <a class="cta" href="tool_pro.html">🔥 Abrir Gerador PRO</a>
+        <a class="cta2" href="#cadastro">✅ Teste grátis 7 dias</a>
+        <a class="cta3" href="checkout.html?utm_source=site&utm_medium=cta&utm_campaign=launch" target="_self">💳 Assinar agora</a>
+      </p>
+      <div class="hero-vid"><p><strong>Veja em 60s:</strong> como gerar, <b>entender a nota</b> e salvar seus <b>jogos</b>.</p></div>
+      <div class="trust">Compra segura com Mercado Pago • Site protegido (SSL) • Selo de transparência</div>
+    </header>
+
+    
+    <section class="grid">
+      <div class="card">
+        <span class="kicker">O que falam do LotoLab</span>
+        <h2>Gente real, rotina real</h2>
+        <div class="grid">
+          <div class="card" style="min-height:140px">
+            <p class="stars">★★★★★</p>
+            <p>“A nota me deu clareza. Parei de repetir padrão sem perceber e criei um ritual semanal.”</p>
+            <p class="muted">— <b>Carlos M.</b>, São José dos Campos/SP</p>
+          </div>
+          <div class="card" style="min-height:140px">
+            <p class="stars">★★★★★</p>
+            <p>“Simples de usar no celular. Em 1 minuto eu gero e salvo meus jogos com mais organização.”</p>
+            <p class="muted">— <b>Aline S.</b>, Recife/PE</p>
+          </div>
+          <div class="card" style="min-height:140px">
+            <p class="stars">★★★★☆</p>
+            <p>“Curti as combinações diferentes e a explicação da nota. Virou meu passo fixo antes de jogar.”</p>
+            <p class="muted">— <b>João F.</b>, Curitiba/PR</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="kicker">Transparência</span>
+        <h2>Sem promessas. Jogue com responsabilidade.</h2>
+        <p>Loterias são aleatórias. O LotoLab <b>não garante ganhos</b>. Nosso foco é dar <b>método</b>, <b>organização</b> e <b>disciplina</b>.</p>
+        <p><a class="cta" href="tool_pro.html">Abrir o Gerador</a></p>
+      </div>
+    </section>
+    
+
+    <section class="card" id="faq">
+      <h2>FAQ rápido</h2>
+      <details><summary>Garante ganho?</summary><p>Não. Loterias são aleatórias. O valor está em organizar seu hobby com método e disciplina.</p></details>
+      <details><summary>Quais loterias?</summary><p>Mega-Sena e Lotofácil no MVP.</p></details>
+      <details><summary>É para menores?</summary><p>Não. Proibido para menores de 18 anos.</p></details>
+      <details><summary>Posso cancelar?</summary><p>Sim, quando quiser.</p></details>
+    </section>
+
+    <section class="card" id="cadastro">
+      <h2>Teste grátis (7 dias) — Lista de Espera</h2>
+      <form name="cadastro" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="cadastro">
+        <p style="display:none"><label>Não preencha: <input name="bot-field"></label></p>
+        <p><label><b>Nome</b><br><input type="text" name="nome" required></label></p>
+        <p><label><b>E-mail</b><br><input type="email" name="email" required></label></p>
+        <p><label><b>WhatsApp (opcional)</b><br><input type="text" name="whatsapp" placeholder="+55 11 90000-0000"></label></p>
+        <p><button type="submit" style="background:linear-gradient(90deg,#3A86FF,#22C55E);border:none;color:#111;font-weight:800;padding:16px 22px;border-radius:12px">Quero participar</button></p>
+      </form>
+      <p style="color:var(--muted);font-size:12px">Ao enviar, você concorda com a <a href="privacidade.html">Política de Privacidade</a>. Entretenimento 18+.</p>
+    </section>
+
+    <footer>
+      <p>© 2025 LotoLab by VB Solutions • <a href="privacidade.html">Privacidade</a> • <a href="bonus/">Checklist 7 Erros</a> • <a href="bio.html">Link na Bio</a></p>
+    </footer>
+  </div>
+
+  <div class="sticky-cta"><a href="tool_pro.html">Gerar 3 combinações com score agora →</a></div>
+
+<script>
+(function(){ 
+  function tick(){ 
+    const now = new Date();
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    const diff = Math.max(0, end - now);
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor((diff / (1000*60*60)) % 24);
+    const m = Math.floor((diff / (1000*60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+    document.getElementById('d').textContent = d;
+    document.getElementById('h').textContent = h.toString().padStart(2,'0');
+    document.getElementById('m').textContent = m.toString().padStart(2,'0');
+    document.getElementById('s').textContent = s.toString().padStart(2,'0');
+  }
+  tick(); setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

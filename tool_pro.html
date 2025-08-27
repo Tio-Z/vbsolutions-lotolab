@@ -88,41 +88,63 @@
 <script>
 let tab = 'mega';
 let dataMega = null, dataLoto = null;
-function setTab(t){ tab=t; document.getElementById('tabMega').classList.toggle('active',t==='mega'); document.getElementById('tabLoto').classList.toggle('active',t!=='mega'); loadData(); }
+
+function setTab(t){
+  tab = t;
+  document.getElementById('tabMega').classList.toggle('active', t==='mega');
+  document.getElementById('tabLoto').classList.toggle('active', t==='loto');
+  loadData();
+}
 
 async function loadData(){
-  const url = turl();
-  const res = await fetch(url, {cache:'no-cache'});
-  if(!res.ok){ document.getElementById('out').textContent = 'Falha ao carregar dados: ' + res.status; return; }
-  const js = await res.json();
-  if (tab==='mega') dataMega = js; else dataLoto = js;
-  document.getElementById('lotName').textContent = (tab==='mega'?'Mega‑Sena':'Lotofácil');
-  document.getElementById('lastUpdate').textContent = js.last_update_brt || '—';
-  document.getElementById('countRows').textContent = js.rows.length;
-  const slider = document.getElementById('nDraws');
-  if (slider){
-    slider.max = Math.max(10, js.rows.length);
-    slider.value = Math.min(parseInt(slider.value)||30, js.rows.length);
-    document.getElementById('nLabel').textContent = document.getElementById('allDraws').checked ? 'TODOS' : slider.value;
+  try{
+    const url = turl();
+    const res = await fetch(url, {cache:'no-cache'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const js = await res.json();
+    if (!js || !Array.isArray(js.rows)) throw new Error('Formato inválido');
+    if (tab==='mega') dataMega = js; else dataLoto = js;
+
+    document.getElementById('lotName').textContent = (tab==='mega'?'Mega‑Sena':'Lotofácil');
+    document.getElementById('lastUpdate').textContent = js.last_update_brt || '—';
+    document.getElementById('countRows').textContent = js.rows.length;
+
+    const slider = document.getElementById('nDraws');
+    if (slider){
+      slider.max = Math.max(10, js.rows.length);
+      slider.value = Math.min(parseInt(slider.value)||30, js.rows.length);
+      document.getElementById('nLabel').textContent = document.getElementById('allDraws').checked ? 'TODOS' : slider.value;
+    }
+    document.getElementById('mSize').min = (tab==='mega'?6:15);
+    document.getElementById('mSize').max = (tab==='mega'?15:20);
+    document.getElementById('mSize').value = (tab==='mega'?6:15);
+    document.getElementById('out').textContent = 'Dados carregados. Pronto para gerar.';
+  }catch(e){
+    document.getElementById('out').textContent = 'Falha ao carregar dados: ' + e.message + ' — URL: ' + turl();
   }
-  document.getElementById('mSize').min = (tab==='mega'?6:15);
-  document.getElementById('mSize').max = (tab==='mega'?15:20);
-  document.getElementById('mSize').value = (tab==='mega'?6:15);
-  document.getElementById('out').textContent = 'Dados carregados. Pronto para gerar.';
 }
+
 function turl(){ return tab==='mega' ? '/data/mega.json' : '/data/loto.json'; }
-function toggleAll(){ const cb=document.getElementById('allDraws'); document.getElementById('nLabel').textContent = cb.checked ? 'TODOS' : document.getElementById('nDraws').value; }
+function toggleAll(){
+  const cb=document.getElementById('allDraws');
+  document.getElementById('nLabel').textContent = (cb && cb.checked) ? 'TODOS' : document.getElementById('nDraws').value;
+}
 
 function parseDraws(js){
-  return js.rows.map(r => tab==='mega' ? r.slice(2,8).map(Number) : r.slice(2,17).map(Number));
+  // Pega todas as colunas após a data (índice >=2) e mantém apenas números
+  const rows = js.rows.map(r => r.slice(2).map(x => parseInt(x,10)).filter(n => !isNaN(n)));
+  // Garante 6 dezenas para Mega e 15 para Loto
+  const need = (tab==='mega'?6:15);
+  return rows.map(arr => arr.slice(0, need));
 }
+
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function range(n){ return Array.from({length:n}, (_,i)=>i+1); }
 function entropy(prob){ let s=0; for (const p of prob) if (p>0) s -= p*Math.log(p); return s; }
 function longestRun(arr){ let maxR=1,cur=1; for(let i=1;i<arr.length;i++){ if(arr[i]===arr[i-1]+1) cur++; else cur=1; if(cur>maxR) maxR=cur; } return maxR; }
 function overlap(a,b){ const set=new Set(a); return b.filter(x=>set.has(x)).length; }
 
-function scoreCombo(combo,freq,recent,method){ 
+function scoreCombo(combo,freq,recent,method){
   const m = combo.length;
   const evens = combo.filter(n=>n%2===0).length;
   const parityTarget = Math.round(m/2);
@@ -141,51 +163,58 @@ function scoreCombo(combo,freq,recent,method){
   const hot = combo.reduce((a,n)=>a+freq[n],0);
   let hotPenalty = hot * (tab==='mega'?0.4:0.25);
 
-  if (method==='balanced') {{ }}
-  else if (method==='antiHot') {{ hotPenalty *= 1.6; }}
-  else if (method==='minSeq') {{ hotPenalty *= 0.7; }}
-  else if (method==='random') {{ return Math.random()*5; }}
+  if (method==='balanced') { /* padrão */ }
+  else if (method==='antiHot') { hotPenalty *= 1.6; }
+  else if (method==='minSeq') { hotPenalty *= 0.7; }
+  else if (method==='random') { return Math.random()*5; }
   return 4*entScore + 3*parityScore + 3*sumScore - consecPenalty - hotPenalty;
 }
 
 function generate(){
-  const js = (tab==='mega'?dataMega:dataLoto);
-  if (!js) {{ document.getElementById('out').textContent='Carregue os dados primeiro.'; return; }}
-  const draws = parseDraws(js);
-  const nDraws = (document.getElementById('allDraws').checked) ? draws.length : Math.min(parseInt(document.getElementById('nDraws').value)||draws.length, draws.length);
-  const recent = draws.slice(-nDraws);
-  const maxNum = tab==='mega'?60:25;
-  const mSize = Math.max(parseInt(document.getElementById('mSize').value)|| (tab==='mega'?6:15), tab==='mega'?6:15);
-  const mCap = tab==='mega'?15:20;
-  if (mSize>mCap) {{ alert('Tamanho máximo excedido'); return; }}
-  const k = Math.min(parseInt(document.getElementById('kComb').value)||3, 20);
-  const method = document.getElementById('method').value;
+  try{
+    const js = (tab==='mega'?dataMega:dataLoto);
+    if (!js) { document.getElementById('out').textContent='Carregue os dados primeiro.'; return; }
+    const draws = parseDraws(js);
+    if (!draws.length) { document.getElementById('out').textContent='Sem concursos válidos no arquivo.'; return; }
 
-  const freq = Array(maxNum+1).fill(0);
-  recent.forEach(d => d.forEach(n => freq[n]++));
+    const nDraws = (document.getElementById('allDraws').checked) ? draws.length : Math.min(parseInt(document.getElementById('nDraws').value)||draws.length, draws.length);
+    const recent = draws.slice(-nDraws);
+    const maxNum = tab==='mega'?60:25;
+    const mSize = Math.max(parseInt(document.getElementById('mSize').value)|| (tab==='mega'?6:15), tab==='mega'?6:15);
+    const mCap = tab==='mega'?15:20;
+    if (mSize>mCap) { alert('Tamanho máximo excedido'); return; }
+    const k = Math.min(parseInt(document.getElementById('kComb').value)||3, 20);
+    const method = document.getElementById('method').value;
 
-  const pool = [];
-  const samples = tab==='mega'?1500:1200;
-  for (let i=0;i<samples;i++){{ 
-    const combo = shuffle(range(maxNum)).slice(0,mSize).sort((a,b)=>a-b);
-    const s = scoreCombo(combo,freq,recent,method);
-    pool.push({{combo,score:s}});
-  }}
-  pool.sort((a,b)=>b.score - a.score);
+    const freq = Array(maxNum+1).fill(0);
+    recent.forEach(d => d.forEach(n => { if(n>=1 && n<=maxNum) freq[n]++; }));
 
-  const picks=[];
-  for (const c of pool){{ 
-    const maxOv = tab==='mega'?Math.max(2, Math.floor(mSize*0.35)) : Math.max(9, Math.floor(mSize*0.6));
-    const ok = picks.every(p => overlap(p.combo,c.combo) <= maxOv);
-    if (ok) picks.push(c);
-    if (picks.length===k) break;
-  }}
-  const labelMap = {{balanced:'Equilíbrio', antiHot:'Anti-Quente', minSeq:'Min Seq', random:'Random'}};
-  const lines = picks.map((p,i)=>`#${{i+1}}  ${{p.combo.join('-')}}   score:${{p.score.toFixed(3)}}  (N=${{nDraws}} • ${{labelMap[method]}})`);
-  document.getElementById('out').textContent = lines.join('\n');
+    const pool = [];
+    const samples = tab==='mega'?1500:1200;
+    for (let i=0;i<samples;i++){
+      const combo = shuffle(range(maxNum)).slice(0,mSize).sort((a,b)=>a-b);
+      const s = scoreCombo(combo,freq,recent,method);
+      pool.push({combo,score:s});
+    }
+    pool.sort((a,b)=>b.score - a.score);
+
+    const picks=[];
+    for (const c of pool){
+      const maxOv = tab==='mega'?Math.max(2, Math.floor(mSize*0.35)) : Math.max(9, Math.floor(mSize*0.6));
+      const ok = picks.every(p => overlap(p.combo,c.combo) <= maxOv);
+      if (ok) picks.push(c);
+      if (picks.length===k) break;
+    }
+    const labelMap = {balanced:'Equilíbrio', antiHot:'Anti-Quente', minSeq:'Min Seq', random:'Random'};
+    const lines = picks.map((p,i)=>`#${i+1}  ${p.combo.join('-')}   nota:${p.score.toFixed(3)}  (N=${nDraws} • ${labelMap[method]})`);
+    document.getElementById('out').textContent = lines.join('\n');
+  }catch(e){
+    document.getElementById('out').textContent = 'Erro ao gerar: ' + e.message;
+  }
 }
 
-setTab('mega'); loadData();
+setTab('mega'); // inicial
+loadData();
 </script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+Tool PRO:
+  /tool_pro.html?utm_source=ig&utm_medium=organic&utm_campaign=launch
+
+Checkout:
+  /checkout.html?utm_source=ig&utm_medium=bio&utm_campaign=launch
+
+Landing:
+  /index.html?utm_source=ig&utm_medium=organic&utm_campaign=launch
+
+Bônus:
+  /bonus/?utm_source=ig&utm_medium=stories&utm_campaign=launch

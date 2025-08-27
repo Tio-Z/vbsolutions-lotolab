@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bônus — Checklist 7 Erros • LotoLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090f;--card:#0d1118;--muted:#99a3b3;--text:#f7fafc;--primary:#3A86FF;--success:#22C55E;--accent:#F6C90E}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+.wrap{max-width:840px;margin:0 auto;padding:24px}
+h1{font-family:'Poppins',sans-serif;font-size:36px;margin:8px 0}
+.card{background:var(--card);border:1px solid #1b2232;border-radius:16px;padding:18px;margin-top:12px}
+label{display:block;margin:8px 0 6px;font-weight:600}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #263149;background:#0f1116;color:#fff}
+button{padding:14px 18px;border-radius:12px;border:2px solid var(--success);background:#0b1a0f;color:#fff;font-weight:700;cursor:pointer}
+button:hover{background:#0f2214}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Checklist: 7 Erros na Lotofácil</h1>
+  <p class="muted">Baixe grátis o PDF. Entretenimento 18+. Loterias são aleatórias — jogue com responsabilidade.</p>
+  <div class="card">
+    <form name="bonus" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/bonus/ok.html">
+      <input type="hidden" name="form-name" value="bonus">
+      <p style="display:none"><label>Não preencha: <input name="bot-field"></label></p>
+      <label>Nome<input type="text" name="nome" required></label>
+      <label>E-mail<input type="email" name="email" required></label>
+      <label>WhatsApp (opcional)<input type="text" name="whatsapp" placeholder="+55 11 90000-0000"></label>
+      <button type="submit">Quero baixar o PDF</button>
+    </form>
+    <p class="muted" style="margin-top:10px"><a href="/index.html">← Voltar</a></p>
+  </div>
+</div>
+</body>
+</html>

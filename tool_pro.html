@@ -49,7 +49,7 @@
       <div class="row">
         <div>
           <label>Usar últimos <span id="nLabel">30</span> concursos</label>
-          <input id="nDraws" type="range" min="10" max="200" step="1" value="30" oninput="document.getElementById('nLabel').textContent=this.value; const cb=document.getElementById('allDraws'); if(cb) cb.checked=false;">
+          <input id="nDraws" type="range" min="10" max="200" step="1" value="30" oninput="document.getElementById('nLabel').textContent=this.value; const cb=document.getElementById('allDraws'); if(cb) {cb.checked=false; cb.dispatchEvent(new Event('change'));}">
           <label style="margin-top:8px"><input type="checkbox" id="allDraws" onchange="toggleAll()"> Usar <b>todos</b> os concursos</label>
         </div>
         <div>
@@ -99,7 +99,7 @@ function setTab(t){
 async function loadData(){
   try{
     const url = turl();
-    const res = await fetch(url, {cache:'no-cache'});
+    const res = await fetch(bust(url), {cache:'no-cache'});
     if(!res.ok) throw new Error('HTTP '+res.status);
     const js = await res.json();
     if (!js || !Array.isArray(js.rows)) throw new Error('Formato inválido');
@@ -118,16 +118,19 @@ async function loadData(){
     document.getElementById('mSize').min = (tab==='mega'?6:15);
     document.getElementById('mSize').max = (tab==='mega'?15:20);
     document.getElementById('mSize').value = (tab==='mega'?6:15);
-    document.getElementById('out').textContent = 'Dados carregados. Pronto para gerar.';
+    document.getElementById('out').textContent = 'Dados carregados. Pronto para gerar.'; toggleAll();
   }catch(e){
     document.getElementById('out').textContent = 'Falha ao carregar dados: ' + e.message + ' — URL: ' + turl();
   }
 }
 
 function turl(){ return tab==='mega' ? '/data/mega.json' : '/data/loto.json'; }
+function bust(u){ const sep = u.includes('?') ? '&' : '?'; return u + sep + 'v=' + Date.now(); }
 function toggleAll(){
   const cb=document.getElementById('allDraws');
-  document.getElementById('nLabel').textContent = (cb && cb.checked) ? 'TODOS' : document.getElementById('nDraws').value;
+  const slider=document.getElementById('nDraws');
+  document.getElementById('nLabel').textContent = (cb && cb.checked) ? 'TODOS' : slider.value;
+  if (slider){ slider.disabled = !!(cb && cb.checked); }
 }
 
 function parseDraws(js){

@@ -33,8 +33,6 @@ h1,h2,h3{font-family:'Poppins',sans-serif}
 /* Sticky CTA */
 .sticky-cta{position:fixed;bottom:12px;left:0;right:0;display:flex;justify-content:center;z-index:10}
 .sticky-cta a{padding:12px 18px;border-radius:999px;background:#0b1220;color:#fff;border:2px solid var(--primary);font-weight:800}
-/* Accessibility focus */
-:focus-visible{outline:3px solid #7aaeff;outline-offset:2px;border-radius:6px}
 </style>
 </head>
 <body>
@@ -58,7 +56,7 @@ h1,h2,h3{font-family:'Poppins',sans-serif}
 
     <section class="card" aria-labelledby="t2">
       <h2 id="t2">Teste grátis (7 dias) — Lista de Espera</h2>
-      <form class="form-pro" name="cadastro" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/bonus/ok.html" novalidate>
+      <form class="form-pro" name="cadastro" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="bonus/ok.html" novalidate>
         <input type="hidden" name="form-name" value="cadastro">
         <p style="display:none"><label>Não preencha: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
         <div class="form-grid">
@@ -83,7 +81,7 @@ h1,h2,h3{font-family:'Poppins',sans-serif}
           </div>
           <div>
             <label for="phone">WhatsApp / Telefone</label>
-            <input id="phone" type="tel" name="phone" inputmode="numeric" placeholder="(11) 90000-0000" required pattern="\d{10,12}" aria-describedby="hintPhone">
+            <input id="phone" type="tel" name="phone" inputmode="numeric" placeholder="(11) 90000-0000" required aria-describedby="hintPhone">
             <input type="hidden" name="phone_e164" id="phone_e164">
             <div id="hintPhone" class="form-hint">Somente números. Formataremos automaticamente.</div>
           </div>
@@ -103,7 +101,7 @@ h1,h2,h3{font-family:'Poppins',sans-serif}
 
 <div class="sticky-cta"><a href="checkout.html?utm=sticky">Testar agora — 7 dias grátis</a></div>
 
-<!-- Hidden template form for Netlify build-time detection -->
+<!-- Hidden template for Netlify build-time detection -->
 <form name="cadastro" data-netlify="true" netlify-honeypot="bot-field" hidden>
   <input type="hidden" name="form-name" value="cadastro">
   <input type="text" name="nome"><input type="email" name="email">
@@ -113,48 +111,18 @@ h1,h2,h3{font-family:'Poppins',sans-serif}
 
 <script>
 // Countdown to 23:59:59 local
-(function(){
-  function two(n){return String(n).padStart(2,'0');}
-  function tick(){
-    const now=new Date();
-    const end=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59);
-    const diff=Math.max(0,end-now);
-    const d=Math.floor(diff/86400000);
-    const h=Math.floor((diff/3600000)%24);
-    const m=Math.floor((diff/60000)%60);
-    const s=Math.floor((diff/1000)%60);
-    const map={cd_d:d,cd_h:h,cd_m:m,cd_s:s};
-    for(const id in map){ const e=document.getElementById(id); if(e) e.textContent=two(map[id]); }
-    requestAnimationFrame(tick);
-  } tick();
-})();
-// Phone behavior: digits-only while typing, mask on blur, E.164 on submit
-(function(){
-  const cc=document.getElementById('country');
-  const phone=document.getElementById('phone');
-  const hidden=document.getElementById('phone_e164');
-  if(!cc || !phone || !hidden) return;
-  function digits(s){return (s||'').replace(/\D+/g,'');}
-  phone.addEventListener('input',()=>{ phone.value = digits(phone.value); });
-  phone.addEventListener('blur',()=>{
-    const d = digits(phone.value);
-    // Try to format BR (default) as (xx) xxxxx-xxxx or (xx) xxxx-xxxx
-    if(cc.value==='55' && d.length>=10){
-      const ddd=d.slice(0,2), rest=d.slice(2);
-      const fmt = rest.length>9 ? `(${ddd}) ${rest.slice(0,5)}-${rest.slice(5,9)}` : `(${ddd}) ${rest.slice(0,4)}-${rest.slice(4,8)}`;
-      phone.value = fmt.trim();
-    }
-  });
-  const form=document.forms['cadastro'];
-  if(form){
-    form.addEventListener('submit', (ev)=>{
-      // Validate minimally
-      const d=digits(phone.value);
-      if(d.length<10){ ev.preventDefault(); alert('Informe um telefone válido (somente números).'); return; }
-      hidden.value='+'+cc.value+d;
-    });
-  }
-})();
+(function(){function two(n){return String(n).padStart(2,'0');}
+function tick(){const now=new Date();const end=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59);
+const diff=Math.max(0,end-now);const d=Math.floor(diff/86400000);const h=Math.floor((diff/3600000)%24);
+const m=Math.floor((diff/60000)%60);const s=Math.floor((diff/1000)%60);
+const map={cd_d:d,cd_h:h,cd_m:m,cd_s:s};for(const id in map){const e=document.getElementById(id);if(e)e.textContent=two(map[id]);}
+requestAnimationFrame(tick);} tick();})();
+// Phone behavior: digits-only while typing, E.164 on submit
+(function(){const cc=document.getElementById('country');const phone=document.getElementById('phone');const hidden=document.getElementById('phone_e164');
+if(!cc||!phone||!hidden) return; function digits(s){return (s||'').replace(/\D+/g,'');}
+phone.addEventListener('input',()=>{ phone.value = digits(phone.value); });
+const form=document.forms['cadastro']; if(form){ form.addEventListener('submit',(ev)=>{ const d=digits(phone.value);
+ if(d.length<10){ ev.preventDefault(); alert('Informe um telefone válido (somente números).'); return; } hidden.value='+'+cc.value+d; }); }} )();
 </script>
 </body>
 </html>

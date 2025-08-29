@@ -1,8 +1,7 @@
 <!doctype html>
 <html lang="pt-br">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LotoLab • Gerador PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -61,18 +60,17 @@ button.primary{background:#0b1220;border:2px solid var(--primary);font-weight:80
   </div>
 </div>
 <script>
-const state={game:'mega',draws:[],version:'FIX10-'+new Date().toISOString().slice(0,10)};
+const state={game:'mega',draws:[],version:'FIX11-'+new Date().toISOString().slice(0,10)};
 const ui={kLoaded:byId('kLoaded'),kSample:byId('kSample'),kGame:byId('kGame'),nDraws:byId('nDraws'),nLabel:byId('nLabel'),allDraws:byId('allDraws'),out:byId('out'),qty:byId('qty'),method:byId('method')};
 function byId(id){return document.getElementById(id)}
-function dataUrl(){return state.game==='mega'?'/data/mega.json':'/data/loto.json'}
+function urls(){const a=['/data','data'];const f=state.game==='mega'?'mega.json':'loto.json';return a.map(p=>`${p}/${f}`)}
 function bust(u){return u+(u.includes('?')?'&':'?')+'v='+state.version+'-'+Date.now()}
+async function fetchFirst(paths){for(const p of paths){try{const r=await fetch(bust(p),{cache:'no-store'});if(r.ok){return await r.json();}}catch(e){}}throw new Error('Nenhum dataset encontrado')}
 
 async function loadData(){
   ui.out.textContent='Carregando dados…';
   try{
-    const res=await fetch(bust(dataUrl()),{cache:'no-store',mode:'cors'});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const data=await res.json();
+    const data=await fetchFirst(urls());
     state.draws=normalize(data);
     if(!state.draws.length) throw new Error('Dataset vazio');
     const total=state.draws.length;
@@ -85,16 +83,7 @@ async function loadData(){
     ui.kGame.textContent=state.game==='mega'?'Mega‑Sena':'Lotofácil';
     ui.out.textContent='Dados carregados. Pronto para gerar.';
   }catch(e){
-    // fallback mínimo para manter a página funcional
-    const fallback = state.game==='mega'
-      ? [[4,8,15,16,23,42],[1,2,3,4,5,6],[7,12,19,33,45,58]]
-      : [[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],[2,4,6,8,10,12,14,16,18,20,22,24,1,3,5]];
-    state.draws = fallback;
-    ui.kLoaded.textContent = fallback.length;
-    ui.nDraws.min=1; ui.nDraws.max=fallback.length; ui.nDraws.value=fallback.length;
-    syncSample();
-    ui.out.innerHTML='<span style="color:#ffad66">Aviso: usando dataset de fallback (não encontrou /data). Verifique o deploy dos JSONs.</span>';
-    console.warn('loadData fallback:', e);
+    state.draws=[[1]]; ui.kLoaded.textContent='0'; ui.out.innerHTML='<span style="color:#ffad66">Erro ao carregar /data. Confirme se data/*.json foi publicado.</span>';
   }
 }
 // Aceita múltiplos formatos de JSON
@@ -107,14 +96,8 @@ function normalize(json){
 }
 function coerce(arr){
   return arr.map(row=>{
-    if(Array.isArray(row)){
-      // [concurso, data, d1, d2, ...]
-      return row.slice(2).map(x=>+String(x).replace(/\D+/g,''));
-    }
-    if(row&&typeof row==='object'){
-      const xs=row.dezenas||row.numeros||row.n||[];
-      return Array.isArray(xs)? xs.map(n=>+n) : [];
-    }
+    if(Array.isArray(row)){return row.slice(2).map(x=>+String(x).replace(/\D+/g,''));}
+    if(row&&typeof row==='object'){const xs=row.dezenas||row.numeros||row.n||[]; return Array.isArray(xs)?xs.map(n=>+n):[];}
     return [];
   }).filter(a=>a.length>0);
 }
@@ -125,7 +108,6 @@ function syncSample(){
 }
 ui.nDraws.addEventListener('input',()=>{ui.allDraws.checked=false; syncSample();});
 ui.allDraws.addEventListener('change', syncSample);
-
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   t.classList.add('active');
@@ -135,24 +117,14 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   syncSample();
   loadData();
 }));
-
 function pickUnique(k,max){ const s=new Set(); while(s.size<k) s.add(1+Math.floor(Math.random()*max)); return Array.from(s).sort((a,b)=>a-b); }
 function generateOne(){ return state.game==='mega'?pickUnique(6,60):pickUnique(15,25); }
-
 function generate(){
-  const total=state.draws.length;
-  if(!total){ ui.out.innerHTML='<span style="color:#ff6">Dados não carregados.</span>'; return; }
-  const useAll=ui.allDraws.checked;
-  const N=useAll? total : Math.min(+ui.nDraws.value, total);
-  const qty=+ui.qty.value;
-  let html='';
-  for(let i=0;i<qty;i++){
-    const nums=generateOne();
-    html+=`<div class="combo"><b>#${i+1}</b> — ${nums.join(' - ')} <span class="note">(${useAll?'TODOS':('N='+N)}, ${state.game==='mega'?'6 de 60':'15 de 25'})</span></div>`;
-  }
+  const total=state.draws.length; if(!total||total===1){ui.out.innerHTML='<span style="color:#ff6">Dados não carregados.</span>'; return;}
+  const useAll=ui.allDraws.checked; const N=useAll? total : Math.min(+ui.nDraws.value, total); const qty=+ui.qty.value;
+  let html=''; for(let i=0;i<qty;i++){ const nums=generateOne(); html+=`<div class="combo"><b>#${i+1}</b> — ${nums.join(' - ')} <span class="note">(${useAll?'TODOS':('N='+N)}, ${state.game==='mega'?'6 de 60':'15 de 25'})</span></div>`; }
   ui.out.innerHTML=html||'<span class="muted">Nada gerado.</span>';
 }
-
 byId('go').addEventListener('click', generate);
 loadData(); syncSample();
 </script>

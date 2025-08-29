@@ -1,1 +1,112 @@
-<!doctype html><meta charset='utf-8'><title>LotoLab</title><body>index placeholder</body>
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LotoLab — Gere combinações com método</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090f;--card:#0c111a;--stroke:#1d2638;--muted:#9aa3b2;--text:#f3f7ff;--primary:#3A86FF}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--stroke);border-radius:18px;padding:20px;margin:14px 0}
+.hero{display:grid;grid-template-columns:1.4fr 1fr;gap:16px} @media(max-width:900px){.hero{grid-template-columns:1fr}}
+.btn{display:inline-block;padding:14px 18px;border-radius:12px;background:#0b1220;color:#fff;border:2px solid var(--primary);font-weight:800;text-decoration:none}
+.muted{color:var(--muted)}
+.deal-timer{border-radius:18px;padding:20px;background:linear-gradient(135deg,#5dd2ff 0%,#a07bff 100%);color:#0b1220;box-shadow:0 12px 28px rgba(0,0,0,.25)}
+.timer-digits{display:flex;gap:16px;align-items:center;justify-content:center}
+.timer-digits .slot{background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.55);border-radius:12px;padding:10px 12px;min-width:92px;text-align:center}
+.timer-digits .val{font-family:'Poppins',sans-serif;font-size:34px;font-weight:900;line-height:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:900px){.form-grid{grid-template-columns:1fr}}
+.sticky-cta{position:fixed;bottom:12px;left:0;right:0;display:flex;justify-content:center;z-index:50}
+.sticky-cta a{padding:12px 18px;border-radius:999px;background:#0b1220;color:#fff;border:2px solid var(--primary);font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="card">
+      <h1 style="font-family:'Poppins',sans-serif">Gere 3 combinações com nota — em 30s</h1>
+      <p class="muted">Transparência total. Entretenimento 18+.</p>
+      <div class="deal-timer" aria-live="polite">
+        <h3 style="margin:0 0 4px;font-family:'Poppins',sans-serif">Oferta Beta</h3>
+        <p style="margin:0 0 10px;font-weight:600">Termina em:</p>
+        <div class="timer-digits">
+          <div class="slot"><span class="val" id="cd_d">00</span><div style="font-size:12px">Dias</div></div>
+          <div class="slot"><span class="val" id="cd_h">00</span><div style="font-size:12px">Hrs</div></div>
+          <div class="slot"><span class="val" id="cd_m">00</span><div style="font-size:12px">Min</div></div>
+          <div class="slot"><span class="val" id="cd_s">00</span><div style="font-size:12px">Seg</div></div>
+        </div>
+        <p style="margin:12px 0 0"><a class="btn" href="checkout.html?utm=timer">Assinar agora</a></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="font-family:'Poppins',sans-serif">Teste grátis (7 dias) — Lista de Espera</h2>
+      <form class="form-pro" name="cadastro" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/bonus/ok.html">
+        <input type="hidden" name="form-name" value="cadastro">
+        <p style="display:none"><label>Não preencha: <input name="bot-field"></label></p>
+        <div class="form-grid">
+          <div><label>Nome</label><input type="text" name="nome" required></div>
+          <div><label>E‑mail</label><input type="email" name="email" required></div>
+          <div>
+            <label>País</label>
+            <select name="country" id="country" required>
+              <option value="55" selected>🇧🇷 Brasil (+55)</option>
+              <option value="1">🇺🇸 EUA (+1)</option>
+              <option value="351">🇵🇹 Portugal (+351)</option>
+              <option value="34">🇪🇸 Espanha (+34)</option>
+              <option value="54">🇦🇷 Argentina (+54)</option>
+              <option value="52">🇲🇽 México (+52)</option>
+            </select>
+          </div>
+          <div>
+            <label>WhatsApp / Telefone</label>
+            <input type="tel" id="phone" name="phone" inputmode="numeric" placeholder="(11) 90000-0000" required>
+            <input type="hidden" name="phone_e164" id="phone_e164">
+          </div>
+        </div>
+        <p><button type="submit" class="btn" style="background:linear-gradient(90deg,#3A86FF,#22C55E);border-color:transparent;color:#111">Quero participar</button></p>
+      </form>
+      <p class="muted" style="font-size:12px">18+. Sem promessa de ganho.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h2 style="font-family:'Poppins',sans-serif">Como funciona</h2>
+    <p>Escolha a loteria, marque “Usar todos” para ler todo o histórico ou ajuste o período com o controle. Gere 3–10 combinações com metodologias como Equilíbrio, Anti‑Quente e Mínima sequência.</p>
+    <p><a class="btn" href="tool_pro.html?utm=cta">Abrir Gerador PRO</a></p>
+  </div>
+</div>
+<div class="sticky-cta"><a href="checkout.html?utm=sticky">Testar agora — 7 dias grátis</a></div>
+
+<!-- hidden template for Netlify detection -->
+<form name="cadastro" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="hidden" name="form-name" value="cadastro">
+  <input type="text" name="nome"><input type="email" name="email">
+  <select name="country"><option>55</option></select>
+  <input type="text" name="phone"><input type="text" name="phone_e164">
+</form>
+
+<script>
+(function(){ // countdown
+  function two(n){return String(n).padStart(2,'0');}
+  function tick(){
+    const now=new Date(), end=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59);
+    const diff=Math.max(0,end-now);
+    const d=Math.floor(diff/86400000), h=Math.floor((diff/3600000)%24),
+          m=Math.floor((diff/60000)%60), s=Math.floor((diff/1000)%60);
+    const D=document.getElementById('cd_d'),H=document.getElementById('cd_h'),M=document.getElementById('cd_m'),S=document.getElementById('cd_s');
+    if(D){D.textContent=two(d)}; if(H){H.textContent=two(h)}; if(M){M.textContent=two(m)}; if(S){S.textContent=two(s)};
+    requestAnimationFrame(tick);
+  } tick();
+})(); 
+(function(){ // phone mask + E.164
+  const patterns={'55':'(##) #####-####','1':'(###) ###-####','351':'9## ### ###','34':'### ### ###','54':'## ####-####','52':'## #### ####'};
+  const cc=document.getElementById('country'), phone=document.getElementById('phone'), h=document.getElementById('phone_e164');
+  function digits(s){return (s||'').replace(/\D+/g,'');}
+  function mask(d,m){let o='',i=0; for(const ch of m){ if(ch==='#'){ if(i<d.length) o+=d[i++]; } else { if(i<d.length) o+=ch; } } return o;}
+  function apply(){ const m=patterns[cc.value]||'##########'; phone.placeholder=m.replace(/#/g,'0'); phone.value=mask(digits(phone.value), m); }
+  cc.addEventListener('change', apply); phone.addEventListener('input', apply);
+  document.forms['cadastro'].addEventListener('submit',()=>{ h.value='+'+cc.value+digits(phone.value); });
+  apply();
+})();
+</script>
+</body></html>

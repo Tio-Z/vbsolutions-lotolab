@@ -1,0 +1,1 @@
+// fetch script full will be provided inline in chat if needed

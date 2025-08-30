@@ -1,5 +1,5 @@
-/bonus/ok.html   /bonus/ok.html   200
-/data/*          /data/:splat     200
-/tool_pro        /tool_pro.html   200
-/checkout        /checkout.html   200
-/*               /index.html      200
+/bonus/ok.html /bonus/ok.html 200
+/data/* /data/:splat 200
+/tool_pro /tool_pro.html 200
+/checkout /checkout.html 200
+/* /index.html 200
